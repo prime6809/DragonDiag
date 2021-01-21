@@ -1,0 +1,177 @@
+Interpreting the results.
+
+This is an aid to faults with the Dragon / CoCo that *MAY* cause the tests to 
+fail, and will serve as an indication as to what might be the cause of the 
+fault.
+
+Test 1 / pre-test 1 fail.
+
+If the card displays the signon message on the LCD and then turns on all 8
+status LEDS this indicates a failure of the Diag card's self test. (Uusally
+the onboard RAM). If possible test the card in another machine to see if this
+is the case.
+
+If the card does not sign on the LCD this may indicate a failed CPU or SAM 
+chip. The LEDs should be checked and the following may be indicated :
+
+LED 	State	Possible fault
++5V	off	Power supply fault, sometimes worth wiggling power switch.
++12V	off	On a machine with 4K/16K RAMS, may prevent RAM from working.
+halt	on	HALT line to the CPU stuck low, preventing the CPU running.
+reset	on	RESET line stuck low.
+E	off	No E clock to CPU.
+Q	off	No Q clock to CPU.
+
+If the E and Q leds are off but you are getting a picture on the screen, this
+may indicate a break of the line somewhere between the SAM and the CPU. 
+
+Halt or Reset lines being stuck low, may indicate a short of those lines to 
+ground, or that the pullup resistor on those lines has failed.
+
+
+Test 2 - machine setup and initialization of SAM/PIAs.
+
+No failures tested as this is a setup stage.
+
+
+Test 3 - Video RAM test.
+
+A Display RAM failure will be indicated on the LCD display, and will be 
+something like :-
+"Failed at:$0400 w$00 r$08"
+
+This means that the ram failed at address $0400, and that the value written
+was $00, but read back was $08. From this we can determine that the fault 
+lies with bit 3 of the RAM. Note for display RAM tests on a non CoCo 3, this
+will always be in bank 0 of a machine with 4K or 16K rams.
+
+A failure of the 74LS244, buffer chip that is between the CPU and RAM can
+also cause this fault.
+
+
+Test 4 - Quick RAM test.
+
+Prease refer to notes for Test 3 Video RAM test. However it should be noted 
+that for a machine with only one bank of RAM e.g. a 4K or 16K CoCo 1/2, if
+the "single bank" dip switch is not set, this test will fail on trying to 
+test the non-existant second bank of RAM.
+
+
+Test 5 - RAM address test.
+
+This test is carried out in 2 parts, first a single 256 byte page of RAM is 
+filled with an ascending value, and then the values are read back. A failure 
+can be caused by a broken address line between A0 and A7. 
+
+The second part fills the entire 32K with an ascending value, incremented on
+each page boundry, so the first page gets $00 written to it, the next page 
+$10 and so on.
+
+This will cause a later value to over-write an earlier one. By examining 
+the values you can determine which address line is broken.
+
+e.g. if A7 where broken, then it would fail at address $00, with the value 
+$80 written. 
+
+This test will generally fail at address $00, and the value written, ill tell
+you which address line is possibly faulty. 
+
+Value	Address line	Address line
+	0..7		8..F
+$80	A7		A15 (not tested!)
+$40	A6		A14
+$20	A5		A13
+$10	A4		A12
+$08	A3		A11
+$04	A2		A10
+$02	A1		A9
+$01	A0		A8
+
+
+Test 6 - ROM test.
+
+If the ROMS are recognized their checksums and identities are displayed note
+that having NONE or Unknown in the $8000-$9FFF area of a CoCo 1/2 may not 
+indicate a failure, if the machine does not have Extended Colour Basic fitted.
+
+In other cases check that the roms identified match what you would expect for
+that machine. Note also that a DraCo machine in CoCo mode will find CB/ECB 
+but find Dragon roms in Dragon mode.
+
+
+Test 7 - PIA test.
+
+A failure at this point may indicate a bad PIA, or possibly an address decoding
+error (usually a failure of the 74LS138), the toggle test may be able to help
+you determine this.
+
+
+Test 8 - spurious interrupt test.
+
+If any spurious FIRQ or NMI interrupts are displayed then this may indicate a 
+short to one of the interrupt lines, or possibly a failure in the line's pullup
+resistor.
+
+
+Test 9 - Interrrupt test.
+
+A failure in the NMI test may indicate a faulty NMI line on the CPU, or a break / 
+short in the NMI line somewhere between the cartridge port and the CPU.
+
+A failure in the FIRQ test may indicate a faulty FIRQ line on the CPU, it may 
+also indicate a fault with PIA1, or with the lines between the cartridge port and
+PIA1, or between PIA1 and the CPU.
+
+The X1 LED should begin to flash at approximately 1Hz, if it does then the IRQ is
+working. Failing to flash may indicate a faulty IRQ line on the CPU, it may 
+also indicate a fault with PIA0, or with the lines between the 6847 VDG and
+PIA0, or between PIA0 and the CPU.
+
+
+Test 10 - Cartridge select signals.
+
+A failure to trigger of CART / CTS or P2 /SCS may indicate a broken line between
+the 74LS138 address decoder and the cartridge port, or that the lines is shorted
+to ground or to +5V.
+
+
+Test 11 - Long RAM test.
+
+For details see test 3 and test 4.
+
+
+Test 12 - Dragon 64 tests.
+
+Check for expected ROM checksums for second ROM.
+More extensive ACIA tests to follow, currently just dumps registers.
+
+
+Test 13 - Upper RAM test.
+
+For details see test 3 and test 4.
+
+
+Test 14 - Dragon Plus test.
+
+For details see test 3 and test 4, however a fail here may indicate a faulty RAM
+on the Dragon plus board. Check that correct message is displayed on Dragon Plus
+screen.
+
+
+Test 15 - CoCo 3 tests.
+
+Check for correct checksums for $C000-$DFFF and $E000-$FE00 ROMS.
+RAM failure meaning will generally indicate which chip has failed, for a 128K 
+CoCo 3 this will be one of the 64Kx4 RAMs on the mainboard, for expanded machines
+this will indicate a chip on your expansion board.
+
+ 
+
+General.
+
+If the board boots but all tests seem to fail, or give unknown / bad results in the
+case of the ROM and PIA tests, check the status of the DSD / SLENB line (pin 6 on 
+the 74LS138) With no cartridge in the machine measure the voltage level on this line 
+with the machine on, it should be close to 5.0V. This line is generally pulled up via 
+a 4.7K resistor, so with the machine off the resistance between pins 6 an 16 of the 
+74LS138 should be arrounf 4.7K.

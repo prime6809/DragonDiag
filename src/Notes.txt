@@ -1,0 +1,417 @@
+Notes for the Dragon/CoCo Diag cart.
+
+V1.30 2020-05-27, Phill Harvey-Smith.
+
+The Diag cart will perform the following tests on a Dragon 32, Dragon 64, Tandy
+CoCo 1 or Tandy CoCo 2. It has as yet not been tested with a CoCo 3. 
+
+The following tests will be performed in order :
+Tests marked ** are *NOT* carried out on the CoCo3, as they are not relevant to
+that machine 
+
+1) 	Onboard SRAM test (SRAM on the card).  A failure at this point will
+	prevent further testing, this will be indicated by the 8 LEDS on the
+	bargraph coming on....this should never happen :)
+	
+2) 	PIAs and SAM initialized acording to DIP switches and motherboard jumpers.
+	On the CoCo3 the GIME registers are also setup as needed.
+	
+3) 	Video ram at $0400-$0600 tested. If working output will be to screen as 
+	well as LCD.
+	The configured machine and detected RAM chip type will be displayed.
+
+4) 	A quick memory test of the bottom 2 memory areas will be done. The size
+	of the memory areas will be determined from the memory type selection
+	jumpers on the Dragon or CoCo motherboard. They are :-
+
+	CoCo with 4K RAMS		Dragon/CoCo with 16K or 64K RAMS
+	block 0	$0000-$0FFF		$0000-$3FFF
+	block 1 $1000-$1FFF  	$4000-$7FFF
+
+	If A RAM failure occurs, then the test is eneded, and the address that 
+	the failure occured at plus the data byte read and written are displayed.
+	Further testing then halts until the 'next' button is pressed, this will
+	end further testing of this bank.
+	Pressing S3 allows the test to continue at the location following the
+	location with error.
+
+5) 	A RAM address line test, carried out in two halves testing first the 
+	bottom 8 address lines then the top 8. This should help to detect address
+	line faults between the CPU and SAM/GIME.
+
+6) 	The two onboard ROM blocks $8000-$9FFF and $A000-$BFFF are checksumed. The
+	checksums are displayed on the LCD and screen. In addition if the ROM has a
+	recognized checksum, then it's idenetity is also displayed on the VDG screen.
+	See ROM checksum table further down for expected values.
+	
+7) 	The PIA registers for the standard 2 PIAs at $FF00 and $FF20 are then dumped.
+	Their expected contents in the Control and DDR registers of each port are checked,
+	and the status displayed OK/NO on the VDG or Y/N on the LCD.
+	
+8) 	The number of spurious NMI and FIRQ interrupts are displayed. (there should 
+	be none).
+
+9) 	The above interrupts are then tested by being triggered via the onboard CPLD,
+	and the results displayed.
+
+	The IRQ interrupt is also enabled, from the VDG, if working LED X1 will begin 
+	flashing approximately once per second.
+   
+10) The CART / CTS and P2 / SCS signals will then be tested by triggering them 
+	using the CPLD, and the status displayed, either pass if they trigger as 
+	expected, fail if they do not, or "stuck low" if they are low when not 
+	being triggered.
+	
+11) ** If the DIP switch is set for long tests, then a more exhaustive long memory test
+	is performed. As with the quick test it will stop on failure and wait for the 
+	'next' button to be pressed.
+	
+12) **	If the appropreate DIP switches are set the Dragon 64 tests are done. These 
+    	are:
+		a) Checksumming the ROM that is copied into upper RAM when booted into 
+		   RAM mode. 	
+		b) Dumping the ACIA registers.
+
+13) ** 	If the machine is detected as having 64K DRAMS, then the upper half of the 
+	64K of RAM is tested. If the long test DIP is set, then the long test is ran 
+	otherwise the short test.
+	
+14) **	The Dragon Plus addon is probed for, if found it's RAM is also tested.	
+
+15) 	If the machine is a CoCo 3, the following additional tests are done :
+
+		a) The additional ROMS at $C000-$FDFF are read and checksummed, 
+		   and results displayed on screen / LCD.
+	
+		b) The ammount of RAM 128K or 512K is probed for, sequentially
+		   paged in (8K at a time) and tested, whilst testing it's block
+		   number is displayed plus the normal PASSED or error report.
+		   
+16) 	At this point all tests are complete, a message will be displayed and the
+    	user has the option of pressing 'next' to enter toggle mode. 
+	
+Toggle mode.
+
+As an aid to fault tracing, toggle mode is entered once all tests are complete
+this mode will repeatedly read the addresses of different parts of the system so
+that the correct operaion of the chip select lines can be verified.
+
+The things toggled are :
+
+device		Base	74LS138 pin	In addition
+RAM read 	$0000	Y0 pin 15	/RAS on bank 0 of RAMS
+RAM read 	$1000	Y0 pin 15	/RAS on bank 1 of RAMS (4K) **	
+RAM read 	$4000	Y0 pin 15	/RAS on bank 1 of RAMS (16K) **
+ROM0 		$8000	Y1 pin 14	
+ROM1		$A000	Y2 pin 13
+ROM2 (cart)	$C000	Y3 pin 12
+PIA0		$FF00	Y4 pin 11
+PIA1		$FF20	Y5 pin 10
+I/O 2 (cart)	$FF40	Y6 pin 9
+RAM write 	$0000	Y7 pin 7	/RAS and /WE on bank 0 of RAMS
+RAM write	$1000	Y7 pin 7	/RAS and /WE on bank 1 of RAMS (4K) **	
+RAM write	$4000	Y7 pin 7	/RAS and /WE on bank 1 of RAMS (16K) **
+						
+
+** On machines with 64K RAMs there is only one RAS signal so RAS0 will toggle 
+not RAS1.
+ 	
+Whilst in toggle mode the following keys are available
+
+	Next will exit the toggle mode and restart the diag cart.
+	S3 will move to the next toggle in the list, looping at the end.
+	S4 will move to the previous toggle in the list, looping at the beginning.
+	
+
+User interface buttons :
+There are currently 4 buttons on the card, of which 3 are currently used
+
+	Label			Purpose
+	S1 / Next		Moves to the next test, after an error occurs.
+	S2 / Pause		Will pause further testing until pause is 
+				pressed again.
+				A LED will light to indicate the paused state.
+	S3			Unused
+	S4			If pressed whilst initial signon message is 
+				displayed then the software build date will be
+				displayed on the LCD before commencing the tests.
+	
+	Boot			Hold down when pressing Reset, to boot into 
+				normal Basic mode, there is also a jumper for 
+				this.
+
+Jumpers
+	Boot			As with Boot button above, used to set it 
+				without having to  press at each power on 
+				/ reset.
+	AS			Autostart, if jumpered the ROM will be 
+				autostarted like a standard Dragon cartridge. 
+				This is usefull if other ROMS are present in 
+				the ROM banks of the cartridge.
+					
+The function of the DIP switches (beneath LED array) is as follows :
+
+	DIP 4			Machine is Dragon (right/on) or CoCo (left/off)
+	DIP 3			Set RAM type directly from DIP1, DIP2 (on)
+				Set machine type from DIP1, DIP2 (off)
+	DIP 2			Machine model / RAM chip type msb
+	DIP 1			Machine model / RAM chip type lsb
+
+Note the silkscreen on the Mk 1.2 boards incorrectly labels the Dragon/CoCo switch
+this has been fixed on the Mk 1.4 boards.
+	
+If Machine is set as Dragon then DIP 1/2 are as follows
+
+	Model			DIP 2		DIP 1
+	Dragon 32		off		off
+	Dragon 64		off		on
+	Dragon Alpha		on		on
+
+If machine is set to CoCo then the machine switches are as follows :
+	Model			DIP 2		DIP 1
+	CoCo 1/2		off		off
+	CoCo3			off		on
+
+If DIP 3 is set on, then the RAM chip type will be set directly from the 
+settings of DIP 1 and DIP 2. This is to allow a machine's RAM to be tested 
+correctly if the RAM type detect fails (for example because of a faulty PIA, or
+incorrect jumper setting)
+
+	Chip type		DIP 2		DIP 1
+	4K			off		off
+	16K			off		on
+	64K			on		off
+	Static			on		on
+
+The control DIP switches have the following functions :
+
+	DIP 4	When on tests will repeat in sequence forever, only stopping on
+		a ram error.
+	DIP 3	No delays between tests, usefull to run through all tests 
+		without delays between, only really usefull if VDG display is
+		working.
+	DIP 2	Skip long tests if on.
+	DIP 1	If the machine has 4K or 16K RAMS only test 1 bank. This stops
+		the test generating an error when testing a non existant bank 
+		(on a CoCo).
+
+Note if DIP2 Skip long tests is on, then the following RAM tests are still
+carried out but using the quick test routine rather than the exhaustive RAM 
+test : 
+
+Upper 32K, Dragon Plus, CoCo 3 RAM block test.
+
+Indicator LEDS and their meaning.
+
+	LED		Meaning
+	12V		12V is present on the cartridge connector. Should be 
+			lit for the CoCo 1, and Dragon 32/64. Will not be lit
+			on CoCo 2/3.
+	5V		5V is present on the cartridge connector. Should be lit
+			on all machines.
+	-12V		-12V is present on the cartridge connector. Will only 
+			be lit on CoCo 1.
+
+	E		Lit if the E clock is present and running.
+	Q		Lit if the Q clock is present and running.
+			
+	HALT		Lit if the HALT line is LOW, if lit the HALT line may
+			be shorted to ground.
+	Reset		Lit if the Reset line is LOW, if lit the Reset line may
+			be shorted to ground. Should light if RESET button on 
+			Dragon/CoCo is pressed.
+
+
+Machine 		Voltage LEDS that should be lit.
+Dragon 32/64/Alpha	+12V and +5V
+CoCo 1			+12V, +5V -12V
+CoCo 2/3		+5V
+
+E and Q should always be lit for all machines, if either is not lit it may
+indicate a SAM failure, or one of the clock lines is shorted to ground.
+
+Reset and HALT should be off during normal running, Reset will light when the
+reset button on the machine is pressed but should go out once released. Note
+on the Dragon 64, HALT will also light when reset is pressed, this is normal
+and is due to a diode that pulls HALT low when reset is active. 
+
+
+
+Things the board will not test / relies on being working.
+
+1) The 6809 CPU must be on and working. 
+2) The 74LS783 / 74LS785 SAM / GIME must be woring and generating clocks.
+3) There must be no shorts on the address or data busses. 
+4) The board cannot detect problems with the VDG output.
+
+However the board has been tested and woring in a Dragon 32, with the following
+all removed : RAM, ROMS, both PIAs, and VDG.			
+
+
+The board currently performs no interactive tests such as keyboard / joysticks /
+cassette / sound etc, as these generally will not stop the machine booting and
+can be tested using already existing software (e.g. the DragonData Diag cart).
+
+
+Memory / I/O map.
+
+Note all Memory and I/O is decoded directly from the address lines and bus
+signals CTS/Cart and SCS/P2 are *NOT* used except for accesses to the locations
+detailed below, under Triggers. This is needed so that we can assert SLENB / 
+DSD to override the internal decoding, and so that we can control when these
+lines are triggered to test their correct operation.
+
+$C000-$DFFF	Onboard ROM
+$E000-$FEFF	Onboard static RAM
+$FF40-$FF09	I/O, see below
+$FFF0-$FFFF	Onboard ROM**
+
+** The vectors are read from the onboard ROM, and the DSD/SLENB line is 
+activated to override the ROM mapping on the motherboard, so that we boot 
+direct to our ROM as booting through the onboard ROM relies on too much of the
+hardware being working to make an effective diag board. Holding down the 'Boot'
+button whilst pressing reset will disable this for this boot.
+
+I/O map.
+
+$FF40		LEDS 0..7
+$FF41		LEDS X1,X2
+
+$FF42		Dip switches :-
+	%00000001	LSB of machine type / RAM type
+	%00000010	MSB of machine type / RAM type
+	%00000100	Machine or Ram type
+	%00001000	Dragon or CoCo
+	%00010000	Only test one bank
+	%00100000	Skip long tests
+	%01000000	No delay between tests
+	%10000000	Test continually, loop to beginning once all tests
+			complete
+
+$FF43		Buttons
+	%00000001	Next
+	%00000010	Pause
+	%00000100	S2
+	%00001000	S3
+
+$FF44		Status register
+	%00000001	Live CTS / CSEL (R)
+	%00000010	Live P2 / SCS (R)
+	%00000100	CTS access was latched (R)
+	%00001000	P2 access was latched (R)
+	%00010000	Disable mapping of diag board ROM and RAM when 1 (R/W)
+	%00100000	FIRQ trigger is counting (R), Start FIRQ counter W=1
+	%01000000	NMI trigger is counting (R), Start NMI counter W=1
+	%10000000	Status ready flag (R/W)
+
+$FF45		Reset CTS/P2 latches, by writing (any value) to here.
+
+$FF48		LCD Command register
+$FF49		LCD Data register
+
+Triggers :
+
+$DEFF		Trigger a CTS/CART access, latched in status reg.
+$FF50		Trigger a SCS/P2 access, latched in status reg.
+
+
+ROM bank selection DIP.
+As supplied, Switch 1 on the bank selection DIP is not used, and 1 of 4 banks
+may be selected with switches 2 and 3, the next version will allow for switch
+4 to be used also to select 1 of 8.
+
+DIP 2	DIP 3		ROM
+up	up		Ramoth Diag ROM, drives hardware on card overrides 
+			internal ROM
+down	up		Dragon Data diag ROM, compiled for Dragon.
+up	down		Dragon Data diag ROM, compiled for CoCo.
+down	down		Currently unused.
+
+Note the Dragon Data Diag roms, also required the fitting of the AS and Boot
+jumpers to boot the machin into 'normal' mode. It is intended they are used
+for further interactive testing once the main diag ROM has passed the machine
+without faults.
+
+
+ROM Checksum table
+
+Displayed	Displayed  		Machine
+Checksum	ROM ID (VDG)	
+$B44F		D32 LO			Dragon 32 low rom
+$DACC		D32 HI			Dragon 32 high rom	
+$D753		D64 LO			Dragon 64 low rom (ROM mode)
+$1968		D64 HI			Dragon 64 high rom (ROM mode)	
+
+$7A31		D64-LO			Dragon 64 low rom (RAM mode)
+$ABE9		D64-LO			Dragon 64 high rom (RAM mode)
+
+$E619		cb1.2d			DraCo, CoCo colour basic 1.2 modified 
+					for Dragon hardware
+		
+$677C		CB 1.0			CoCo Color basic 1.0
+$8DC2		CB 1.1			CoCo Color basic 1.1
+$1313		CB 1.2			CoCo Color basic 1.2
+$9E9F		CB 1.2			CoCo Color basic 1.2, CoCo3
+$AD56		CB 1.3			CoCo Color basic 1.3
+
+$E321		cb 1.1			LZ Colour 64, CB 1.1 (clone/pirate).
+$96BF		cb ???			MX-1600, CB unknown,(clone/pirate).
+$5732		cb ???			CP400, CB ??? (clone/pirate).
+
+$9E87		ECB1.0			CoCo Extended color basic 1.0 (C) 1980,
+					from CoCo1
+$AF87		ECB1.0			CoCo Extended color basic 1.0 (C) 1981, 
+					from MESS
+$40AC		ECB1.1			CoCo Extended color basic 1.1
+$7F63		ECB2.0			CoCo Extended color basic 2.0, CoCo3
+
+$F88D		ecb1.0			LZ Colour 64, ECB 1.0 (clone/pirate).
+$986B		ecb1.1			MX-1600, ECB 1.1,(clone/pirate).
+$7733		ecb???			CP400, ECB ??? (clone/pirate).
+		
+$541A		CC3-PR			CoCo3 $C000-$DFFF 'patch' rom
+$C0E6		SECB 1			CoCo3 Super Extended Colour basic				
+		
+$FFFF		NO ROM
+$0000		UNKOWN			displayed if no checksum matches
+
+
+
+Updating the Diag ROM using a DragonMMC board.
+
+This is the procedure to update the Flash ROM on the DIAG board via the ROM 
+socket on the DragonMMC board.
+
+Before you begin, it is **STRONGLY** suggested that you mark the DragonMMC
+and DIAG ROMS so that you can tell them apart as they both use the same flash
+IC.
+
+You should also be familliar with removing and inserting ICs specifically 
+how to identify pin 1 and insert the roms into the socket with the correct
+orientation.
+
+The DragonMMC also requires it's AVR firmware to be later than April 2020.
+
+Steps :
+
+Prepare an SD card with DIAGDGN.ROM and DIAGFSH.DGN on it.
+
+Remove the Diag rom from the diag board and put it in the flash socket on 
+the DragonMMC (first removing the DragonMMC ROM!).
+
+Plug the DragonMMC board into the dragon and turn the dragon on. Note you will
+not get the normal DragonMMC signon message, just the standard Basic sign on, 
+this is normal.
+
+Enter the following commands at the keyboard :
+
+	POKE &HFF55,1
+	POKE &HFF50,&H5E:CLOADM
+	EXEC
+
+If all is well, the diag ROM will now be flashed. Please note the second line 
+**MUST** be typed as a multi statement line, or the CLOADM may fail.
+
+Once the ROM is flashed power the dragon down, and move the diag ROM back to
+the DIAG board. 
+	

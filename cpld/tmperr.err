@@ -1,0 +1,55 @@
+WARNING:Cpld - Unable to retrieve the path to the iSE Project Repository. Will
+   use the default filename of 'Main.ise'.
+INFO:Cpld - Inferring BUFG constraint for signal 'Addr<12>' based upon the LOC
+   constraint 'P22'. It is recommended that you declare this BUFG explicitedly
+   in your design. Note that for certain device families the output of a BUFG
+   constraint can not drive a gated clock, and the BUFG constraint will be
+   ignored.
+INFO:Cpld - Inferring BUFG constraint for signal 'Addr<14>' based upon the LOC
+   constraint 'P23'. It is recommended that you declare this BUFG explicitedly
+   in your design. Note that for certain device families the output of a BUFG
+   constraint can not drive a gated clock, and the BUFG constraint will be
+   ignored.
+INFO:Cpld - Inferring BUFG constraint for signal 'Addr<15>' based upon the LOC
+   constraint 'P27'. It is recommended that you declare this BUFG explicitedly
+   in your design. Note that for certain device families the output of a BUFG
+   constraint can not drive a gated clock, and the BUFG constraint will be
+   ignored.
+WARNING:Cpld:1239 - The global clock designation (BUFG) on signal 'Addr_15_IBUF'
+   is ignored. Most likely the signal is gated and therefore cannot be used as a
+   global control signal.
+WARNING:Cpld:1239 - The global clock designation (BUFG) on signal 'Addr_14_IBUF'
+   is ignored. Most likely the signal is gated and therefore cannot be used as a
+   global control signal.
+WARNING:Cpld:1239 - The global clock designation (BUFG) on signal 'Addr_12_IBUF'
+   is ignored. Most likely the signal is gated and therefore cannot be used as a
+   global control signal.
+WARNING:Cpld:896 - Unable to map all desired signals into function block, FB2,
+   because too many function block product terms are required. Buffering output
+   signal Data<1> to allow all signals assigned to this function block to be
+   placed.
+WARNING:Cpld:896 - Unable to map all desired signals into function block, FB2,
+   because too many function block product terms are required. Buffering output
+   signal Data<0> to allow all signals assigned to this function block to be
+   placed.
+WARNING:Cpld:896 - Unable to map all desired signals into function block, FB2,
+   because too many function block product terms are required. Buffering output
+   signal Data<3> to allow all signals assigned to this function block to be
+   placed.
+WARNING:Cpld:896 - Unable to map all desired signals into function block, FB2,
+   because too many function block product terms are required. Buffering output
+   signal Data<2> to allow all signals assigned to this function block to be
+   placed.
+WARNING:Cpld:896 - Unable to map all desired signals into function block, FB2,
+   because too many function block product terms are required. Buffering output
+   signal Data<7> to allow all signals assigned to this function block to be
+   placed.
+WARNING:Cpld:896 - Unable to map all desired signals into function block, FB2,
+   because too many function block product terms are required. Buffering output
+   signal Data<6> to allow all signals assigned to this function block to be
+   placed.
+ERROR:Cpld:892 - Cannot place signal IntDisable. Consider reducing the
+   collapsing input limit or the product term limit to prevent the fitter from
+   creating high input and/or high product term functions.
+ERROR:Cpld:868 - Cannot fit the design into any of the specified devices with
+   the selected implementation options.
